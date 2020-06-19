@@ -12,31 +12,32 @@ class UIKitDynamicController: UIViewController {
     @IBOutlet weak var anchorView: UIView!
     @IBOutlet weak var animationView: UIView!
     private var dynamicAnimator: UIDynamicAnimator!
+    private var attachment: UIAttachmentBehavior!
+    private var gravity: UIGravityBehavior!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.panHandler(_:)))
-        view.addGestureRecognizer(panGestureRecognizer)
+        let panGestureRecognizer = UIPanGestureRecognizer(target: self,
+                                                          action: #selector(self.panHandler(_:)))
+        anchorView.addGestureRecognizer(panGestureRecognizer)
     }
     
     @objc private func panHandler(_ sender: UIPanGestureRecognizer) {
+        let lenght = 107
         dynamicAnimator = UIDynamicAnimator(referenceView: view)
-        let point = sender.location(in: anchorView)
-        let centerPoint = anchorView.center
+        gravity = UIGravityBehavior(items: [animationView])
         
-        let snap = UISnapBehavior(item: anchorView, snapTo: anchorView.center)
-        let attache = UIAttachmentBehavior(item: animationView, attachedToAnchor:centerPoint)
-        let pushBehaviour = UIPushBehavior(items: [animationView], mode: .continuous)
-        let gravity = UIGravityBehavior(items: [animationView])
-        let itemBehaviour = UIDynamicItemBehavior(items: [animationView])
+        let  itemBehaviour = UIDynamicItemBehavior(items: [animationView])
+        attachment = UIAttachmentBehavior(item: animationView,
+                                          attachedToAnchor: CGPoint(x: anchorView.center.x, y: anchorView.center.y))
         itemBehaviour.elasticity = 0.5
         itemBehaviour.allowsRotation = true
+        attachment.length = CGFloat(lenght)
+        attachment.anchorPoint = sender.location(in: view)
+        anchorView.center = sender.location(in: view)
         
-        dynamicAnimator.addBehavior(attache)
-        dynamicAnimator.addBehavior(pushBehaviour)
+        dynamicAnimator.addBehavior(attachment)
         dynamicAnimator.addBehavior(gravity)
-        dynamicAnimator.addBehavior(snap)
-        
     }
 }
-//Последний тип анимации - UIKitDynamic, ему соответствует UIKitDynamicController. У этого контроллера имеется два аутлета: anchorView и animationView. Кроме того, на anchorView view добавлен UIPanGestureRecognizer. Необходимо реализовать анимацию свободных колебаний animationView вокруг anchorView (подсказка: обратите внимание на UIAttachmentBehavior). Кроме того, должна быть реализована возможность перемещать anchorView пальцем по экрану с сохранением свободных колебаний.
